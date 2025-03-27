@@ -47,6 +47,11 @@ public class UserService {
             else {
                 User user = createFatherUser(application);
                 application.getFather().setUuid(upsertUser(user, request.getRequestInfo()).getUuid());
+                log.info("Already  Father User: {}", user);
+
+                // Add new Code to set id
+                application.getFather().setId(upsertUser(user,request.getRequestInfo()).getId());
+                application.getFather().setUuid(upsertUser(user, request.getRequestInfo()).getUuid());
             }
         });
 
@@ -56,12 +61,19 @@ public class UserService {
             else {
                 User user = createMotherUser(application);
                 application.getMother().setUuid(upsertUser(user, request.getRequestInfo()).getUuid());
+
+                log.info("Already  mother User: {}", user);
+
+                // Add new Code to set id
+                application.getMother().setId(upsertUser(user,request.getRequestInfo()).getId());
+                application.getMother().setUuid(upsertUser(user, request.getRequestInfo()).getUuid());
             }
         });
     }
 
     private User createFatherUser(BirthRegistrationApplication application){
         User father = application.getFather();
+        log.info("Inside father user {}",father);
         User user = User.builder().userName(father.getUserName())
                 .name(father.getName())
                 .userName((father.getUserName()))
@@ -71,6 +83,7 @@ public class UserService {
                 .type(father.getType())
                 .roles(father.getRoles())
                 .build();
+        log.info("father user created {}",user);
         return user;
     }
 

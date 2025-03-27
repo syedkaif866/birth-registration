@@ -64,6 +64,7 @@ public class BirthApiController {
             @ApiParam(value = "Details for the new Birth Registration Application(s) + RequestInfo meta data.", required = true)
             @Valid @RequestBody BirthApplicationSearchRequest birthApplicationSearchRequest) {
 
+        log.info("inside v1RegistrationSearchPost");
         List<BirthRegistrationApplication> applications = birthRegistrationService.searchBtApplications(
                 birthApplicationSearchRequest.getRequestInfo(),
                 birthApplicationSearchRequest.getBirthApplicationSearchCriteria()

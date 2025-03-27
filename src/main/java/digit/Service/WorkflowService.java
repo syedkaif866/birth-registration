@@ -3,6 +3,7 @@ package digit.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import digit.config.BTRConfiguration;
 import digit.repository.ServiceRequestRepository;
+import digit.util.MdmsUtil;
 import digit.web.models.*;
 import lombok.extern.slf4j.Slf4j;
 import org.egov.common.contract.models.Workflow;
@@ -33,6 +34,9 @@ public class WorkflowService {
     @Autowired
     private BTRConfiguration config;
 
+    @Autowired
+    private MdmsUtil mdmsUtil;
+
     public void updateWorkflowStatus(BirthRegistrationRequest birthRegistrationRequest) {
         birthRegistrationRequest.getBirthRegistrationApplications().forEach(application -> {
             ProcessInstance processInstance = getProcessInstanceForBTR(application, birthRegistrationRequest.getRequestInfo());
@@ -51,9 +55,12 @@ public class WorkflowService {
     }
 
     private ProcessInstance getProcessInstanceForBTR(BirthRegistrationApplication application, RequestInfo requestInfo) {
+        log.info("process instance application {},",application);
         Workflow workflow = application.getWorkflow();
+        log.info("process instanceworkflow  application {},",workflow);
 
         ProcessInstance processInstance = new ProcessInstance();
+
         processInstance.setBusinessId(application.getApplicationNumber());
         processInstance.setAction(workflow.getAction());
         processInstance.setModuleName("birth-services");
@@ -61,6 +68,11 @@ public class WorkflowService {
         processInstance.setBusinessService("BTR");
         processInstance.setDocuments(workflow.getDocuments());
         processInstance.setComment(workflow.getComments());
+
+        log.info("ProcessInstance:"+processInstance);
+        log.info("WorflowStatusCode:"+workflow.getAction());
+        log.info("Workflow:"+workflow);
+
 
         if(!CollectionUtils.isEmpty(workflow.getAssignes())){
             List<User> users = new ArrayList<>();
@@ -124,8 +136,10 @@ public class WorkflowService {
         url.append(config.getWfBusinessServiceSearchPath());
         url.append("?tenantId=");
         url.append(tenantId);
-        url.append("&businessServices=");
+//        url.append("&businessServices=");
+        url.append("&businessIds=");
         url.append(businessService);
+
         return url;
     }
 

@@ -13,6 +13,7 @@ import org.egov.common.contract.request.RequestInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import digit.util.MdmsUtil; // Ensure this is the correct package for MdmsUtil
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -61,7 +62,16 @@ public class BirthRegistrationService {
 //        return birthRegistrationRequest.getBirthRegistrationApplications();
 //    }
 
+    @Autowired
+    private MdmsUtil mdmsUtil;
+
     public List<BirthRegistrationApplication> registerBtRequest(BirthRegistrationRequest birthRegistrationRequest) {
+       
+    //     Integer registrationCharges = mdmsUtil.fetchRegistrationChargesFromMdms(
+    //     birthRegistrationRequest.getRequestInfo(),
+    //     birthRegistrationRequest.getBirthRegistrationApplications().get(0).getTenantId()
+    // );
+
         // Validate applications
         validator.validateBirthApplication(birthRegistrationRequest);
 
@@ -112,6 +122,7 @@ public class BirthRegistrationService {
         applications.forEach(application -> {
             enrichmentUtil.enrichFatherApplicantOnSearch(application);
             enrichmentUtil.enrichMotherApplicantOnSearch(application);
+            enrichmentUtil.enrichApplicationWithWorkFlow(requestInfo,application);
         });
 
         // Otherwise return the found applications
@@ -122,13 +133,21 @@ public class BirthRegistrationService {
 
     public BirthRegistrationApplication updateBtApplication(BirthRegistrationRequest birthRegistrationRequest) {
         // Validate whether the application that is being requested for update indeed exists
+
         BirthRegistrationApplication existingApplication = validator.validateApplicationExistence(birthRegistrationRequest.getBirthRegistrationApplications().get(0));
+        // log.info("Exis");
+        log.info("Entered into updateBT"+existingApplication.toString());
+
         existingApplication.setWorkflow(birthRegistrationRequest.getBirthRegistrationApplications().get(0).getWorkflow());
+        // log.info("Setting for existing Application the Workflow"+birthRegistrationRequest.getBirthRegistrationApplications().get(0).getWorkflow());
+//  log.info("Setting for existing Application the father"+birthRegistrationRequest.getBirthRegistrationApplications().get(0).getFather());
         log.info(existingApplication.toString());
         birthRegistrationRequest.setBirthRegistrationApplications(Collections.singletonList(existingApplication));
 
         // Enrich application upon update
         enrichmentUtil.enrichBirthApplicationUponUpdate(birthRegistrationRequest);
+
+        //  log.info("Setting for existing Application the father"+existingApplication);
 
         workflowService.updateWorkflowStatus(birthRegistrationRequest);
 
